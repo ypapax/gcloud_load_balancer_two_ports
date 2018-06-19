@@ -152,7 +152,7 @@ delete_http_proxy2(){
 
 forwarding_rule(){
 	gcloud compute forwarding-rules create forwarding-rule80 --global --target-http-proxy twoports-proxy1 --ports 80
-	gcloud compute forwarding-rules create forwarding-rule8080 --global --target-http-proxy twoports-proxy1 --ports 8080
+	gcloud compute forwarding-rules create forwarding-rule8080 --global --target-http-proxy twoports-proxy2 --ports 8080
 }
 
 describe_forwarding_rule(){
@@ -216,6 +216,30 @@ delim(){
 	set +x
 	echo "------------------"
 	set -x
+}
+delim2(){
+	set +x
+	echo "------------------"
+	echo "------------------"
+	set -x
+}
+
+describeAll(){
+	delim
+	get_name_ports
+	delim2
+	describeBackends
+}
+
+get_name_ports(){
+	gcloud compute instance-groups managed get-named-ports twoports-group
+}
+
+describeBackends(){
+	delim
+	gcloud compute backend-services describe twoports-backend --global | tee >(cat 1>&2) | grep 80
+	delim
+	gcloud compute backend-services describe twoports-backend2 --global | tee >(cat 1>&2) | grep 8080
 }
 
 $@
