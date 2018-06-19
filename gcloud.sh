@@ -2,14 +2,15 @@
 set -ex
 
 createAll(){
-	./commands.sh build
-	./commands.sh push
 	template_create
 	create_managed_group
 	set_named_ports
 	set +e; create_health_check80; set -e;
+	set +e; create_health_check8080; set -e;
 	create_backend
+	create_backend2
 	add_backend
+	add_backend2
 	url_map
 	url_map2
 	create_http_proxy1
@@ -31,6 +32,7 @@ deleteAll(){
 	url_map_delete1
 	url_map_delete2
 	delete_backend
+	delete_backend2
 	delete_group
 	template_delete
 	set -e;
@@ -72,16 +74,45 @@ create_health_check80(){
 	    --unhealthy-threshold 3
 }
 
+create_health_check8080(){
+	gcloud compute health-checks create http healthcheck8080 --port 8080 \
+	    --check-interval 30s \
+	    --healthy-threshold 1 \
+	    --timeout 10s \
+	    --unhealthy-threshold 3
+}
+
 create_backend(){
-	gcloud compute backend-services create twoports-backend --global --health-checks=healthcheck80
+	gcloud compute backend-services create twoports-backend --global \
+		--health-checks=healthcheck80 \
+		--port-name app80
+}
+
+create_backend2(){
+	gcloud compute backend-services create twoports-backend2 --global \
+		--health-checks=healthcheck8080 \
+		--port-name app8080
 }
 
 delete_backend(){
 	gcloud compute backend-services delete twoports-backend --global --quiet
 }
 
+delete_backend2(){
+	gcloud compute backend-services delete twoports-backend2 --global --quiet
+}
+
+
+
 add_backend(){
 	gcloud compute backend-services add-backend twoports-backend \
+	--global \
+	--instance-group=twoports-group \
+	--instance-group-zone europe-west1-b
+}
+
+add_backend2(){
+	gcloud compute backend-services add-backend twoports-backend2 \
 	--global \
 	--instance-group=twoports-group \
 	--instance-group-zone europe-west1-b
@@ -92,7 +123,7 @@ url_map(){
 }
 
 url_map2(){
-	gcloud compute url-maps create twoports-map2 --default-service twoports-backend
+	gcloud compute url-maps create twoports-map2 --default-service twoports-backend2
 }
 
 url_map_delete1(){
