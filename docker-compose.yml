@@ -1,0 +1,9 @@
+version: "3.2"
+services:
+  server:
+    image: ypapax/two_ports
+    command: bash /usr/share/nginx/html/entrypoint.sh
+    container_name: two_ports_compose
+    ports:
+      - 80:80/tcp
+      - 8080:8080/tcp
