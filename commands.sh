@@ -24,6 +24,7 @@ rerun(){
 
 up(){
 	build
+	docker-compose stop
 	docker-compose up
 }
 
