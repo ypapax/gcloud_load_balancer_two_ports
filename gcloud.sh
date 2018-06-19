@@ -2,8 +2,8 @@
 set -ex
 
 createAll(){
-	$GOPATH/src/github.com/ypapax/gcloud_load_balancer_two_ports/commands.sh build
-	$GOPATH/src/github.com/ypapax/gcloud_load_balancer_two_ports/commands.sh push
+	./commands.sh build
+	./commands.sh push
 	template_create
 	create_managed_group
 	set_named_ports
